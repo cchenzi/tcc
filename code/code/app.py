@@ -5,7 +5,12 @@ import pandas as pd
 import pytesseract
 import glob
 import cv2
-from utils import encode_and_prepare_image, process_text, get_regex
+from utils import (
+    encode_and_prepare_image,
+    process_text,
+    get_keywords_digits,
+    merge_dicts,
+)
 from image_processing import prepare_composition, compose_functions, resize_img
 from texts import (
     PROCESS_DEFINITIONS,
@@ -19,46 +24,29 @@ from texts import (
     BLUR_2,
     TEXT_PROCESSING_TEXT,
     WORDS_TEXT,
+    words_water,
+    words_food,
 )
 
-words_water = [
-    "bicarbonato",
-    "sodio",
-    "calcio",
-    "magnesio",
-    "cloreto",
-    "sulfato",
-    "potassio",
-    "nitrato",
-    "fluoreto",
-    "estroncio",
-    "bario",
-]
-words = [
-    "carboidratos",
-    "proteinas",
-    "gorduras totais",
-    "gorduras saturadas",
-    "gorduras trans",
-    "fibra alimentar",
-    "sodio",
-    "valor energetico",
-]
+
 languages = {"engUS": "English", "ptBR": "Português"}
-words_dict = {"Water": words_water, "Food": words}
+words_dict = {"Water": words_water, "Food": words_food}
 
 
 st.markdown(
-    logo_html, unsafe_allow_html=True,
+    logo_html,
+    unsafe_allow_html=True,
 )
 st.title(PROJECT_TILE)
 
 lang = st.sidebar.selectbox(
-    "", ["engUS", "ptBR"], format_func=lambda x: languages.get(x),
+    "",
+    ["engUS", "ptBR"],
+    format_func=lambda x: languages.get(x),
 )
 st.header(PROJECT_SUBTITLE[lang])
 st.sidebar.title(PROCESS_DEFINITIONS[lang])
-filenames = list(sorted(glob.glob("./images/good_examples/*")))
+filenames = list(sorted(glob.glob("./images/2/*")))
 file_to_show = st.sidebar.selectbox(IMAGE_SELECTION[lang], filenames)
 
 load_image = st.sidebar.checkbox(IMAGE_LOAD[lang], value=False)
@@ -106,7 +94,8 @@ if not load_image:
 else:
     img = cv2.imread(file_to_show, cv2.IMREAD_GRAYSCALE)
     st.markdown(
-        encode_and_prepare_image("Original", img), unsafe_allow_html=True,
+        encode_and_prepare_image("Original", img),
+        unsafe_allow_html=True,
     )
     result_dict = {}
     result_cols = [
@@ -130,10 +119,8 @@ else:
 
             txt = pytesseract.image_to_string(composed_image, lang="por")
             try:
-                terms, terms_to_search, distance_acc, df2 = process_text(
-                    txt, words_to_consider
-                )
-                result = get_regex(terms_to_search, txt)
+                terms, terms_to_search = process_text(txt, words_to_consider)
+                result = get_keywords_digits(terms_to_search, txt)
                 result_dict = {}
                 result_dict = dict(
                     zip(
@@ -151,13 +138,13 @@ else:
                 result_df = result_df.append(result_dict, ignore_index=True)
             except:
                 print(f"Unable to process image to {scale_factor}!")
-
         st.write("-------------------")
         st.header("Results:")
         result_df = result_df.sort_values(by=["acc_terms", "acc_tts"], ascending=False)
         terms_set = list(
             set([item for sublist in result_df["terms"] for item in sublist])
         )
+        digits_set = merge_dicts(result_df["terms_to_search"])
         st.write(result_df)
         best_result = result_df.iloc[0]
         st.subheader("Accuracy")
@@ -169,6 +156,10 @@ else:
         st.write(terms_set)
         st.subheader("Terms recovered (best result)")
         st.write(best_result["terms"])
+        st.subheader("Digits recovered (combined)")
+        st.write(digits_set)
+        st.subheader("Digits recovered (best result)")
+        st.write(best_result["terms_to_search"])
         st.write("-------------------")
         st.subheader("Recovered text...")
         st.write(best_result["recovered_text"])

@@ -39,3 +39,28 @@ WORDS_TEXT = {
     "ptBR": "Palavras a serem consideradas",
     "engUS": "Words to consider",
 }
+
+
+words_water = [
+    "bicarbonato",
+    "sodio",
+    "calcio",
+    "magnesio",
+    "cloreto",
+    "sulfato",
+    "potassio",
+    "nitrato",
+    "fluoreto",
+    "estroncio",
+    "bario",
+]
+words_food = [
+    "carboidratos",
+    "proteinas",
+    "gorduras totais",
+    "gorduras saturadas",
+    "gorduras trans",
+    "fibra alimentar",
+    "sodio",
+    "valor energetico",
+]
