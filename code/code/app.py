@@ -46,7 +46,7 @@ lang = st.sidebar.selectbox(
 )
 st.header(PROJECT_SUBTITLE[lang])
 st.sidebar.title(PROCESS_DEFINITIONS[lang])
-filenames = list(sorted(glob.glob("./images/2/*")))
+filenames = list(sorted(glob.glob("./images/sample_sets/4/*")))
 file_to_show = st.sidebar.selectbox(IMAGE_SELECTION[lang], filenames)
 
 load_image = st.sidebar.checkbox(IMAGE_LOAD[lang], value=False)

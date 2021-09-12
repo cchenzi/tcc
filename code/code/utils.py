@@ -125,7 +125,9 @@ def merge_dicts(dict_list):
     for dd in dict_list:
         for (k, v) in dd.items():
             if k not in result:
-                result[k] = [v]
+                result[k] = {v}
             else:
-                result[k].append(v)
+                result[k].add(v)
+    for (k, v) in result.items():
+        result[k] = list(v)
     return result

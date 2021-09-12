@@ -131,7 +131,7 @@ def do_all(img):
     return filtered, merged, resized
 
 
-def apply_ocr(image, bounding_boxes):
+def apply_ocr_e3(image, bounding_boxes):
     results = []
     y, x = image.shape
     for idx, bb in enumerate(bounding_boxes):
@@ -146,7 +146,5 @@ def apply_ocr(image, bounding_boxes):
         output = pytesseract.image_to_string(
             image[int(ymin) : int(ymax), int(xmin) : int(xmax)], lang="por"
         )
-        if output not in ["\x0c", "\n\x0c", " \x0c", " \n\x0c"]:
-            results.append((idx, output))
-
-    return results
+        results.append(output)
+    return " ".join(results)
